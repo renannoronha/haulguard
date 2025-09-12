@@ -1,0 +1,39 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports: ["5432:5432"]
+    volumes: ["pg:/var/lib/postgresql/data"]
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  mongo:
+    image: mongo:7
+    ports: ["27017:27017"]
+    volumes: ["mongo:/data/db"]
+
+  pubsub:
+    image: google/cloud-sdk:emulators
+    command: [ "gcloud", "beta", "emulators", "pubsub", "start", "--host-port=0.0.0.0:8085" ]
+    ports: ["8085:8085"]
+
+  pubsub-init:
+    image: google/cloud-sdk:emulators
+    depends_on: [pubsub]
+    environment:
+      PUBSUB_EMULATOR_HOST: "pubsub:8085"
+    entrypoint: ["/bin/sh","-c"]
+    command: >
+      "gcloud beta emulators pubsub env-init &&
+       gcloud pubsub topics create load.assigned --project=fake &&
+       gcloud pubsub subscriptions create load.assigned.sub
+         --topic=load.assigned --project=fake"
+volumes:
+  pg: {}
+  mongo: {}
