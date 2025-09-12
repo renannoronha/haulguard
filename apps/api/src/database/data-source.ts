@@ -12,6 +12,6 @@ export const AppDataSource = new DataSource({
   database: process.env.POSTGRES_DB,
   // ATENÇÃO: para gerar migrações aponte p/ .ts; para rodar em prod (build) use .js
   entities: ['src/**/*.entity.ts'],
-  migrations: ['src/migrations/*.ts'],
+  migrations: ['src/database/migrations/*.ts'],
   synchronize: false, // SEMPRE false quando usando migrações
 });

@@ -6,12 +6,17 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { Driver } from '../../drivers/entities/driver.entity';
 import { Load } from '../../loads/entities/load.entity';
 import { AssignmentStatus } from '../enums/assignment-status.enum';
 
 @Entity('assignment')
+@Index('idx_unique_active_assignment', ['driverId', 'status'], {
+  unique: true,
+  where: `status = ${AssignmentStatus.ASSIGNED}`,
+})
 export class Assignment {
   @PrimaryGeneratedColumn()
   id: number;
