@@ -19,9 +19,31 @@ export class AssignmentsService {
       return savedAssignment;
     } catch (error) {
       if (error instanceof QueryFailedError) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        if (error?.driverError?.code === "23505") {
-          throw new ConflictException("driver_already_has_active_assignment");
+        const driverErr = (error as { driverError?: unknown }).driverError;
+        const code =
+          driverErr && typeof driverErr === "object" && "code" in driverErr
+            ? (driverErr as { code?: unknown }).code
+            : undefined;
+
+        if (code === "23505") {
+          const constraint =
+            driverErr &&
+            typeof driverErr === "object" &&
+            "constraint" in driverErr
+              ? (driverErr as { constraint?: unknown }).constraint
+              : undefined;
+
+          if (typeof constraint === "string") {
+            if (constraint.includes("load")) {
+              throw new ConflictException("load_already_has_active_assignment");
+            }
+            if (constraint.includes("driver")) {
+              throw new ConflictException(
+                "driver_already_has_active_assignment",
+              );
+            }
+          }
+          throw new ConflictException("assignment_conflict");
         }
       }
       throw error;
