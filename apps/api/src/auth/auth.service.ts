@@ -1,26 +1,82 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { UsersService } from "src/users/users.service";
+import { AuthDto } from "./dto/auth.dto";
+import { CreateUserDto } from "src/users/dto/create-user.dto";
+import { QueryFailedError } from "typeorm";
+import { randomUUID } from "crypto";
+import { PasswordService } from "libs/security/password.service";
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService,
+    private password: PasswordService,
+  ) {}
+
+  async signup(email: string, password: string, name: string): Promise<any> {
+    const user = new CreateUserDto();
+    user.email = email;
+    user.password = await this.password.hash(password);
+    user.name = name;
+    try {
+      await this.usersService.create(user);
+      return { message: "signup_success" };
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (error?.driverError?.code === "23505") {
+          throw new ConflictException("signup_failed_user_registered");
+        }
+      }
+      throw error; // repropaga outros erros
+    }
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  async login(username: string, password: string): Promise<any> {
+    const user = await this.usersService.findByEmail(username);
+
+    if (!user) {
+      throw new UnauthorizedException("login_failed_user_not_found");
+    }
+
+    if (!user.status) {
+      throw new UnauthorizedException("login_failed_user_inactive");
+    }
+
+    const isMatch = await this.password.verify(user.password, password);
+    if (!isMatch) {
+      throw new UnauthorizedException("login_failed_wrong_password");
+    }
+
+    const jti = randomUUID();
+
+    const payload: AuthDto = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      sessionId: jti,
+    };
+    const access_token = await this.jwtService.signAsync(payload);
+
+    await this.usersService.update(user.id, {
+      lastLogin: new Date(),
+      sessionId: jti,
+    });
+    return { access_token: access_token };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
+  async logout(user: AuthDto): Promise<any> {
+    await this.usersService.update(user.id, {
+      sessionId: null,
+    });
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    return { message: "logout_success" };
   }
 }
