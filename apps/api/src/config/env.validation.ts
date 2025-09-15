@@ -8,6 +8,8 @@ export const envValidate = (config: Record<string, unknown>) => {
     "JWT_SECRET",
     "BCRYPT_ROUNDS",
     "BCRYPT_PEPPER",
+    "REDIS_HOST",
+    "REDIS_PORT",
   ];
 
   for (const key of required) {
@@ -20,5 +22,6 @@ export const envValidate = (config: Record<string, unknown>) => {
     ...config,
     POSTGRES_PORT: Number(config.POSTGRES_PORT),
     BCRYPT_ROUNDS: Number(config.BCRYPT_ROUNDS),
+    REDIS_PORT: Number(config.REDIS_PORT),
   };
 };

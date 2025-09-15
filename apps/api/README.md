@@ -43,6 +43,8 @@ These variables must be set before running the application:
 - `JWT_SECRET`
 - `BCRYPT_ROUNDS`
 - `BCRYPT_PEPPER`
+- `REDIS_HOST`
+- `REDIS_PORT`
 
 ## Compile and run the project
 
@@ -56,6 +58,12 @@ $ npm run start:dev
 # production mode
 $ npm run start:prod
 ```
+
+### Notes on Redis cache
+
+- The endpoint `GET /loads` is cached for 60 seconds using Redis.
+- On `POST /loads`, `PATCH /loads/:id`, and `DELETE /loads/:id`, the cache key `loads:all` is invalidated.
+- Configure `REDIS_HOST` and `REDIS_PORT` or the cache falls back to in-memory storage.
 
 ## Run tests
 

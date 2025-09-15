@@ -1,25 +1,36 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateLoadDto } from "./dto/create-load.dto";
 import { UpdateLoadDto } from "./dto/update-load.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Load } from "./entities/load.entity";
 import { Repository } from "typeorm";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import type { Cache } from "cache-manager";
 
 @Injectable()
 export class LoadsService {
   constructor(
     @InjectRepository(Load)
     private loadsRepository: Repository<Load>,
+    @Inject(CACHE_MANAGER) private cache: Cache,
   ) {}
 
   async create(createLoadDto: CreateLoadDto) {
     const load = this.loadsRepository.create(createLoadDto);
     const savedLoad = await this.loadsRepository.save(load);
+    // Invalidate cached loads list
+    await this.cache.del("loads:all");
     return { id: savedLoad.id };
   }
 
-  findAll() {
-    return this.loadsRepository.find();
+  async findAll(): Promise<Load[]> {
+    const key = "loads:all";
+    const cached = await this.cache.get<Load[]>(key);
+    if (cached) return cached;
+    const list = await this.loadsRepository.find();
+    // 60 seconds TTL
+    await this.cache.set(key, list, 60);
+    return list;
   }
 
   findOne(id: number) {
@@ -28,6 +39,8 @@ export class LoadsService {
 
   async update(id: number, updateLoadDto: UpdateLoadDto) {
     await this.loadsRepository.update(id, updateLoadDto);
+    // Invalidate cached loads list
+    await this.cache.del("loads:all");
     return { message: "updated_load_successfully" };
   }
 
@@ -36,6 +49,8 @@ export class LoadsService {
     if (!result.affected) {
       throw new NotFoundException("load_not_found");
     }
+    // Invalidate cached loads list
+    await this.cache.del("loads:all");
     return { message: "deleted_load_successfully" };
   }
 }
