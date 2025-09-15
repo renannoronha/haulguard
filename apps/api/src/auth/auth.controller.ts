@@ -10,6 +10,7 @@ import {
 import { AuthService } from "./auth.service";
 import { LoginDto } from "./dto/login.dto";
 import { AuthDto } from "./dto/auth.dto";
+import { SignUpDto } from "./dto/signup.dto";
 import { Public } from "./public.decorator";
 
 @Controller("auth")
@@ -18,15 +19,8 @@ export class AuthController {
 
   @Public()
   @Post("signup")
-  signup(
-    @Body(ValidationPipe)
-    data: {
-      email: string;
-      password: string;
-      name: string;
-    },
-  ) {
-    return this.authService.signup(data.email, data.password, data.name);
+  signup(@Body() data: SignUpDto) {
+    return this.authService.signup(data);
   }
 
   @HttpCode(200)
