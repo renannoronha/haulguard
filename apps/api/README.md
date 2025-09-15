@@ -31,6 +31,19 @@
 $ npm install
 ```
 
+## Required environment variables
+
+These variables must be set before running the application:
+
+- `POSTGRES_HOST`
+- `POSTGRES_PORT`
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
+- `POSTGRES_DB`
+- `JWT_SECRET`
+- `BCRYPT_ROUNDS`
+- `BCRYPT_PEPPER`
+
 ## Compile and run the project
 
 ```bash

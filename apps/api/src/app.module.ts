@@ -8,6 +8,7 @@ import { LoadsModule } from "./loads/loads.module";
 import { AssignmentsModule } from "./assignments/assignments.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule } from "@nestjs/config";
+import { envValidate } from "src/config/env.validation";
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { JwtAuthGuard } from "./auth/auth.guard";
 import { ResponseInterceptor } from "./common/http/response.interceptor";
@@ -15,7 +16,10 @@ import { HttpExceptionFilter } from "./common/http/http-exception.filter";
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validate: envValidate,
+    }),
     AuthModule,
     UsersModule,
     DriversModule,
