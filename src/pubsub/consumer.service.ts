@@ -13,6 +13,7 @@ export class ConsumerService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(ConsumerService.name);
   private readonly projectId: string;
   private readonly subscriptionName: string;
+  private readonly topicName: string;
   private readonly pubsub: PubSub;
   private subscription?: Subscription;
 
@@ -23,6 +24,7 @@ export class ConsumerService implements OnModuleInit, OnModuleDestroy {
     const pubsubConfig = this.config.pubsub();
     this.projectId = pubsubConfig.projectId;
     this.subscriptionName = pubsubConfig.subscription;
+    this.topicName = pubsubConfig.topic;
     const options: ConstructorParameters<typeof PubSub>[0] = {
       projectId: this.projectId,
     };
@@ -32,7 +34,8 @@ export class ConsumerService implements OnModuleInit, OnModuleDestroy {
     this.pubsub = new PubSub(options);
   }
 
-  onModuleInit(): void {
+  async onModuleInit(): Promise<void> {
+    await this.ensureSubscription();
     this.subscription = this.pubsub.subscription(this.subscriptionName);
     this.subscription.on("message", (message) => {
       void this.handleMessage(message);
@@ -43,6 +46,24 @@ export class ConsumerService implements OnModuleInit, OnModuleDestroy {
     this.logger.log(
       `Listening for messages on subscription ${this.subscriptionName} (project: ${this.projectId})`,
     );
+  }
+
+  private async ensureSubscription(): Promise<void> {
+    const topic = this.pubsub.topic(this.topicName);
+    const [topicExists] = await topic.exists();
+    if (!topicExists) {
+      await topic.create();
+      this.logger.log(`Created missing topic ${this.topicName}`);
+    }
+
+    const subscription = topic.subscription(this.subscriptionName);
+    const [subscriptionExists] = await subscription.exists();
+    if (!subscriptionExists) {
+      await topic.createSubscription(this.subscriptionName);
+      this.logger.log(
+        `Created missing subscription ${this.subscriptionName} bound to topic ${this.topicName}`,
+      );
+    }
   }
 
   async onModuleDestroy(): Promise<void> {

@@ -87,11 +87,11 @@ export class AppConfigService {
       projectId: this.config.getOrThrow<string>("PUBSUB_PROJECT_ID", {
         infer: true,
       }),
-      topic: this.config.getOrThrow<string>("LOAD_ASSIGNED_TOPIC", {
+      topic: this.config.getOrThrow<string>("PUBSUB_LOAD_ASSIGNED_TOPIC", {
         infer: true,
       }),
       subscription: this.config.getOrThrow<string>(
-        "LOAD_ASSIGNED_SUBSCRIPTION",
+        "PUBSUB_LOAD_ASSIGNED_SUBSCRIPTION",
         { infer: true },
       ),
       emulatorHost,
