@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   ValidationPipe,
+  ParseIntPipe,
 } from "@nestjs/common";
 import { AssignmentsService } from "./assignments.service";
 import { CreateAssignmentDto } from "./dto/create-assignment.dto";
@@ -27,21 +28,21 @@ export class AssignmentsController {
 
   @Get(":driverId/:loadId")
   findOne(
-    @Param("driverId") driverId: string,
-    @Param("loadId") loadId: string,
+    @Param("driverId", ParseIntPipe) driverId: number,
+    @Param("loadId", ParseIntPipe) loadId: number,
   ) {
-    return this.assignmentsService.findOne(+driverId, +loadId);
+    return this.assignmentsService.findOne(driverId, loadId);
   }
 
   @Patch(":driverId/:loadId")
   update(
-    @Param("driverId") driverId: string,
-    @Param("loadId") loadId: string,
+    @Param("driverId", ParseIntPipe) driverId: number,
+    @Param("loadId", ParseIntPipe) loadId: number,
     @Body(ValidationPipe) updateAssignmentDto: UpdateAssignmentDto,
   ) {
     return this.assignmentsService.update(
-      +driverId,
-      +loadId,
+      driverId,
+      loadId,
       updateAssignmentDto,
     );
   }
