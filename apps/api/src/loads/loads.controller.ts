@@ -7,6 +7,7 @@ import {
   Delete,
   ValidationPipe,
   Patch,
+  ParseIntPipe,
 } from "@nestjs/common";
 import { LoadsService } from "./loads.service";
 import { CreateLoadDto } from "./dto/create-load.dto";
@@ -27,20 +28,20 @@ export class LoadsController {
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string) {
-    return this.loadsService.findOne(+id);
+  findOne(@Param("id", ParseIntPipe) id: number) {
+    return this.loadsService.findOne(id);
   }
 
   @Patch(":id")
   update(
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
     @Body(ValidationPipe) updateLoadDto: UpdateLoadDto,
   ) {
-    return this.loadsService.update(+id, updateLoadDto);
+    return this.loadsService.update(id, updateLoadDto);
   }
 
   @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.loadsService.remove(+id);
+  remove(@Param("id", ParseIntPipe) id: number) {
+    return this.loadsService.remove(id);
   }
 }
