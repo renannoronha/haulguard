@@ -61,6 +61,9 @@ $ npm run start:dev
 
 # production mode
 $ npm run start:prod
+
+# pub/sub worker
+$ npm run start:worker
 ```
 
 ### Notes on Redis cache
@@ -93,6 +96,15 @@ $ npm run test:cov
 - On assignment creation the API publishes `load.assigned` with `{ driverId, loadId }`.
 - The Google Pub/Sub Emulator is included in `docker-compose.yml`.
 - Configure `PUBSUB_PROJECT_ID` and `PUBSUB_EMULATOR_HOST` (see `.env.example`).
+
+### Pub/Sub worker
+
+Build the project and run the worker to process subscribed events:
+
+```bash
+$ npm run build
+$ npm run start:worker
+```
 
 ## Deployment
 
