@@ -13,7 +13,13 @@ export class PublisherService {
     this.projectId = pubsub.projectId;
     this.topic = pubsub.topic;
     // If PUBSUB_EMULATOR_HOST is set, the SDK uses the emulator automatically
-    this.pubsub = new PubSub({ projectId: this.projectId });
+    const options: ConstructorParameters<typeof PubSub>[0] = {
+      projectId: this.projectId,
+    };
+    if (pubsub.emulatorHost) {
+      options.apiEndpoint = pubsub.emulatorHost;
+    }
+    this.pubsub = new PubSub(options);
   }
 
   async publish(topic: string, data: unknown): Promise<string> {

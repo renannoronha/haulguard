@@ -23,7 +23,13 @@ export class ConsumerService implements OnModuleInit, OnModuleDestroy {
     const pubsubConfig = this.config.pubsub();
     this.projectId = pubsubConfig.projectId;
     this.subscriptionName = pubsubConfig.subscription;
-    this.pubsub = new PubSub({ projectId: this.projectId });
+    const options: ConstructorParameters<typeof PubSub>[0] = {
+      projectId: this.projectId,
+    };
+    if (pubsubConfig.emulatorHost) {
+      options.apiEndpoint = pubsubConfig.emulatorHost;
+    }
+    this.pubsub = new PubSub(options);
   }
 
   onModuleInit(): void {

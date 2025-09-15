@@ -12,5 +12,5 @@ process.env.MONGO_URI = "mongodb://localhost:27017";
 process.env.MONGO_DB = "haulguard-test";
 process.env.PUBSUB_PROJECT_ID = "test-project";
 process.env.PUBSUB_EMULATOR_HOST = "localhost:8085";
-process.env.LOAD_ASSIGNED_TOPIC = "load.assigned";
-process.env.LOAD_ASSIGNED_SUBSCRIPTION = "load.assigned.sub";
+process.env.PUBSUB_LOAD_ASSIGNED_TOPIC = "load.assigned";
+process.env.PUBSUB_LOAD_ASSIGNED_SUBSCRIPTION = "load.assigned.sub";

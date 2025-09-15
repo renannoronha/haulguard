@@ -79,6 +79,10 @@ export class AppConfigService {
   }
 
   pubsub(): PubSubConfig {
+    const emulatorHost =
+      this.config.get<string>("PUBSUB_EMULATOR_HOST", {
+        infer: true,
+      }) ?? undefined;
     return {
       projectId: this.config.getOrThrow<string>("PUBSUB_PROJECT_ID", {
         infer: true,
@@ -90,10 +94,7 @@ export class AppConfigService {
         "LOAD_ASSIGNED_SUBSCRIPTION",
         { infer: true },
       ),
-      emulatorHost:
-        this.config.get<string>("PUBSUB_EMULATOR_HOST", {
-          infer: true,
-        }) ?? undefined,
+      emulatorHost,
     } satisfies PubSubConfig;
   }
 
