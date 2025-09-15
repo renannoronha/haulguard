@@ -1,31 +1,21 @@
 import { Module } from "@nestjs/common";
 import { AuditService } from "./audit.service";
-import { MongoClient } from "mongodb";
-
-export const MONGO_CLIENT = Symbol("MONGO_CLIENT");
-export const AUDIT_COLLECTION = Symbol("AUDIT_COLLECTION");
+import { MongooseModule } from "@nestjs/mongoose";
+import { AuditEventDoc, AuditEventSchema } from "./audit.schema";
 
 @Module({
-  providers: [
-    {
-      provide: MONGO_CLIENT,
-      useFactory: async () => {
-        const uri = process.env.MONGO_URI ?? "mongodb://localhost:27017";
-        const client = new MongoClient(uri);
-        await client.connect();
-        return client;
-      },
-    },
-    {
-      provide: AUDIT_COLLECTION,
-      useFactory: (client: MongoClient) => {
-        const dbName = process.env.MONGO_DB ?? "haulguard";
-        return client.db(dbName).collection("audit_events");
-      },
-      inject: [MONGO_CLIENT],
-    },
-    AuditService,
+  imports: [
+    MongooseModule.forRootAsync({
+      useFactory: () => ({
+        uri: process.env.MONGO_URI ?? "mongodb://localhost:27017",
+        dbName: process.env.MONGO_DB ?? "haulguard",
+      }),
+    }),
+    MongooseModule.forFeature([
+      { name: AuditEventDoc.name, schema: AuditEventSchema },
+    ]),
   ],
+  providers: [AuditService],
   exports: [AuditService],
 })
 export class AuditModule {}
