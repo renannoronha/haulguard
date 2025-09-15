@@ -10,6 +10,7 @@ import { CreateUserDto } from "src/users/dto/create-user.dto";
 import { QueryFailedError } from "typeorm";
 import { randomUUID } from "crypto";
 import { PasswordService } from "libs/security/password.service";
+import { SignUpDto } from "./dto/signup.dto";
 
 @Injectable()
 export class AuthService {
@@ -19,11 +20,11 @@ export class AuthService {
     private password: PasswordService,
   ) {}
 
-  async signup(email: string, password: string, name: string): Promise<any> {
+  async signup(data: SignUpDto): Promise<any> {
     const user = new CreateUserDto();
-    user.email = email;
-    user.password = await this.password.hash(password);
-    user.name = name;
+    user.email = data.email;
+    user.password = await this.password.hash(data.password);
+    user.name = data.name;
     try {
       await this.usersService.create(user);
       return { message: "signup_success" };
