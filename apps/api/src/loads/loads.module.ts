@@ -6,10 +6,12 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { Load } from "./entities/load.entity";
 import { ConfigModule } from "@nestjs/config";
 import { redisStore } from "cache-manager-redis-yet";
+import { AuditModule } from "../audit/audit.module";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Load]),
+    AuditModule,
     ConfigModule,
     CacheModule.registerAsync({
       isGlobal: false,
