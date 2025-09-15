@@ -10,8 +10,8 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule } from "@nestjs/config";
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { JwtAuthGuard } from "./auth/auth.guard";
-import { ResponseInterceptor } from "./commom/http/response.interceptor";
-import { HttpExceptionFilter } from "./commom/http/http-exception.filter";
+import { ResponseInterceptor } from "./common/http/response.interceptor";
+import { HttpExceptionFilter } from "./common/http/http-exception.filter";
 
 @Module({
   imports: [
