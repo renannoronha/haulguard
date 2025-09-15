@@ -3,7 +3,7 @@
   "rootDir": ".",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
-  "setupFiles": ["./env-setup.ts"],
+  "setupFiles": ["./setup-os-polyfill.ts", "./env-setup.ts"],
   "moduleNameMapper": {
     "^src/(.*)$": "<rootDir>/../src/$1",
     "^libs/(.*)$": "<rootDir>/../libs/$1"

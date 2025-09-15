@@ -1,12 +1,8 @@
-import { CACHE_MANAGER } from "@nestjs/cache-manager";
-import { Test, TestingModule } from "@nestjs/testing";
-import { getRepositoryToken } from "@nestjs/typeorm";
 import { Load } from "./entities/load.entity";
 import { LoadsService } from "./loads.service";
-import { getRepositoryToken } from "@nestjs/typeorm";
-import { Load } from "./entities/load.entity";
-import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { AuditService } from "../audit/audit.service";
+import type { Cache } from "cache-manager";
+import type { Repository } from "typeorm";
 
 describe("LoadsService", () => {
   let service: LoadsService;
@@ -16,57 +12,36 @@ describe("LoadsService", () => {
     find: jest.Mock;
     update: jest.Mock;
     softDelete: jest.Mock;
+    findOneBy: jest.Mock;
   };
   let cache: {
     get: jest.Mock;
     set: jest.Mock;
     del: jest.Mock;
   };
+  let audit: { record: jest.Mock };
 
-  beforeEach(async () => {
+  beforeEach(() => {
     repository = {
       create: jest.fn(),
       save: jest.fn(),
       find: jest.fn(),
       update: jest.fn(),
       softDelete: jest.fn(),
+      findOneBy: jest.fn(),
     };
     cache = {
       get: jest.fn(),
       set: jest.fn(),
       del: jest.fn(),
     };
+    audit = { record: jest.fn() };
 
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        LoadsService,
-        {
-          provide: getRepositoryToken(Load),
-          useValue: {
-            create: jest.fn(),
-            save: jest.fn(),
-            find: jest.fn(),
-            findOneBy: jest.fn(),
-            update: jest.fn(),
-            softDelete: jest.fn(),
-          },
-        },
-        {
-          provide: CACHE_MANAGER,
-          useValue: {
-            del: jest.fn(),
-            get: jest.fn(),
-            set: jest.fn(),
-          },
-        },
-        {
-          provide: AuditService,
-          useValue: { record: jest.fn() },
-        },
-      ],
-    }).compile();
-
-    service = module.get<LoadsService>(LoadsService);
+    service = new LoadsService(
+      repository as unknown as Repository<Load>,
+      cache as unknown as Cache,
+      audit as unknown as AuditService,
+    );
   });
 
   it("should be defined", () => {

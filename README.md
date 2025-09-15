@@ -12,21 +12,24 @@ This repository contains the HaulGuard API, background worker, and infrastructur
    ```bash
    docker-compose up -d
    ```
-3. **Install Node.js dependencies** (run from `apps/api`)
+3. **Install Node.js dependencies** (from the repository root)
    ```bash
-   cd apps/api
    npm install
    ```
-4. **Run the API in watch mode** (leave running in its own terminal)
+4. **Run database migrations**
+   ```bash
+   npm run db:migrate
+   ```
+5. **Run the API in watch mode** (leave running in its own terminal)
    ```bash
    npm run start:dev
    ```
-5. **Start the background worker** in a separate terminal so it can consume Pub/Sub messages and write audit events.
+6. **Start the background worker** in a separate terminal so it can consume Pub/Sub messages and write audit events.
    ```bash
    npm run start:worker
    ```
 
-After both processes are running, return to the repository root to execute integration tests and tooling.
+After the API and worker are online you can exercise automated tests from the same terminal session.
 
 ## Services provided by `docker-compose`
 
