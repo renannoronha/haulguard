@@ -4,13 +4,17 @@ import { AuthController } from "./auth.controller";
 import { UsersModule } from "src/users/users.module";
 import { JwtModule } from "@nestjs/jwt";
 import { ConfigModule } from "@nestjs/config";
+import { envValidate } from "src/config/env.validation";
 import { PassportModule } from "@nestjs/passport";
 import { JwtStrategy } from "./jwt.strategy";
 import { SecurityModule } from "libs/security/security.module";
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validate: envValidate,
+    }),
     UsersModule,
     PassportModule,
     JwtModule.register({
