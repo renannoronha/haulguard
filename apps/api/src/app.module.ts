@@ -13,6 +13,8 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { JwtAuthGuard } from "./auth/auth.guard";
 import { ResponseInterceptor } from "./common/http/response.interceptor";
 import { HttpExceptionFilter } from "./common/http/http-exception.filter";
+import { AuditModule } from "./audit/audit.module";
+import { PublisherModule } from "./pubsub/publisher.module";
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { HttpExceptionFilter } from "./common/http/http-exception.filter";
     DriversModule,
     LoadsModule,
     AssignmentsModule,
+    AuditModule,
+    PublisherModule,
     TypeOrmModule.forRoot({
       type: "postgres",
       host: process.env.POSTGRES_HOST,

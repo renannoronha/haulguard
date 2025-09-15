@@ -45,6 +45,10 @@ These variables must be set before running the application:
 - `BCRYPT_PEPPER`
 - `REDIS_HOST`
 - `REDIS_PORT`
+- `MONGO_URI`
+- `MONGO_DB`
+- `PUBSUB_PROJECT_ID`
+  - Optional: `PUBSUB_EMULATOR_HOST` (use emulator in docker-compose)
 
 ## Compile and run the project
 
@@ -77,6 +81,18 @@ $ npm run test:e2e
 # test coverage
 $ npm run test:cov
 ```
+
+### Audit (MongoDB)
+
+- Audit events are written to MongoDB collection `audit_events` using the native driver.
+- Document shape: `{ type: string, payload: any, timestamp: Date }`.
+- Configure `MONGO_URI` and `MONGO_DB` (defaults provided in `.env.example`).
+
+### Pub/Sub (Emulator)
+
+- On assignment creation the API publishes `load.assigned` with `{ driverId, loadId }`.
+- The Google Pub/Sub Emulator is included in `docker-compose.yml`.
+- Configure `PUBSUB_PROJECT_ID` and `PUBSUB_EMULATOR_HOST` (see `.env.example`).
 
 ## Deployment
 

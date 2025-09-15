@@ -5,10 +5,6 @@ import { LoadsController } from "./loads.controller";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Load } from "./entities/load.entity";
 import { ConfigModule } from "@nestjs/config";
-
-// Use a dynamic Redis store when env is present
-
-// @ts-expect-error: optional peer until deps are installed
 import { redisStore } from "cache-manager-redis-yet";
 
 @Module({

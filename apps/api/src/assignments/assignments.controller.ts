@@ -11,6 +11,7 @@ import {
 import { AssignmentsService } from "./assignments.service";
 import { CreateAssignmentDto } from "./dto/create-assignment.dto";
 import { UpdateAssignmentDto } from "./dto/update-assignment.dto";
+import { UpdateAssignmentStatusDto } from "./dto/update-assignment-status.dto";
 
 @Controller("assignments")
 export class AssignmentsController {
@@ -37,5 +38,13 @@ export class AssignmentsController {
     @Body(ValidationPipe) updateAssignmentDto: UpdateAssignmentDto,
   ) {
     return this.assignmentsService.update(id, updateAssignmentDto);
+  }
+
+  @Patch(":id/status")
+  updateStatus(
+    @Param("id", ParseIntPipe) id: number,
+    @Body(ValidationPipe) updateAssignmentDto: UpdateAssignmentStatusDto,
+  ) {
+    return this.assignmentsService.updateStatus(id, updateAssignmentDto);
   }
 }

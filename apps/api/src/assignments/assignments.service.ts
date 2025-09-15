@@ -4,18 +4,36 @@ import { UpdateAssignmentDto } from "./dto/update-assignment.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Assignment } from "./entities/assignment.entity";
 import { QueryFailedError, Repository } from "typeorm";
+import { PublisherService } from "src/pubsub/publisher.service";
+import { AuditService } from "src/audit/audit.service";
+import { UpdateAssignmentStatusDto } from "./dto/update-assignment-status.dto";
 
 @Injectable()
 export class AssignmentsService {
   constructor(
     @InjectRepository(Assignment)
     private assignmentsRepository: Repository<Assignment>,
+    private readonly publisher: PublisherService,
+    private readonly audit: AuditService,
   ) {}
 
   async create(createAssignmentDto: CreateAssignmentDto) {
     try {
       const assignment = this.assignmentsRepository.create(createAssignmentDto);
       const savedAssignment = await this.assignmentsRepository.save(assignment);
+      // publish event to Pub/Sub emulator
+      void this.publisher.publishLoadAssigned({
+        driverId: savedAssignment.driverId,
+        loadId: savedAssignment.loadId,
+      });
+      // record audit event in MongoDB
+      await this.audit.record({
+        type: "ASSIGNED",
+        payload: {
+          driverId: savedAssignment.driverId,
+          loadId: savedAssignment.loadId,
+        },
+      });
       return savedAssignment;
     } catch (error) {
       if (error instanceof QueryFailedError) {
@@ -62,6 +80,17 @@ export class AssignmentsService {
     const result = await this.assignmentsRepository.update(
       { id },
       updateAssignmentDto,
+    );
+    return { affected: result.affected || 0 };
+  }
+
+  async updateStatus(
+    id: number,
+    updateAssignmentDto: UpdateAssignmentStatusDto,
+  ) {
+    const result = await this.assignmentsRepository.update(
+      { id },
+      { status: updateAssignmentDto.status },
     );
     return { affected: result.affected || 0 };
   }

@@ -10,6 +10,9 @@ export const envValidate = (config: Record<string, unknown>) => {
     "BCRYPT_PEPPER",
     "REDIS_HOST",
     "REDIS_PORT",
+    "MONGO_URI",
+    "MONGO_DB",
+    "PUBSUB_PROJECT_ID",
   ];
 
   for (const key of required) {
