@@ -92,6 +92,10 @@ export class AssignmentsService {
       { id },
       { status: updateAssignmentDto.status },
     );
+    await this.audit.record({
+      type: updateAssignmentDto.status,
+      payload: { assignmentId: id },
+    });
     return { affected: result.affected || 0 };
   }
 }
