@@ -1,4 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -41,13 +45,13 @@ export class UsersService {
     // Check if new password is different than old password
     const user = await this.usersRepository.findOneBy({ id });
     if (!user) {
-      throw new Error("User not found");
+      throw new NotFoundException("user_not_found");
     }
 
     if (
       await this.password.verify(user.password, updatePasswordDto.newPassword)
     ) {
-      throw new Error("New password must be different from old password");
+      throw new BadRequestException("password_must_differ");
     }
 
     // Hash new password and update user
