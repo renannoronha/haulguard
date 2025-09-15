@@ -31,9 +31,9 @@ services:
     entrypoint: ["/bin/sh","-c"]
     command: >
       "gcloud beta emulators pubsub env-init &&
-       gcloud pubsub topics create ${LOAD_ASSIGNED_TOPIC} --project=${PUBSUB_PROJECT_ID} &&
-       gcloud pubsub subscriptions create ${LOAD_ASSIGNED_SUBSCRIPTION} \
-         --topic=${LOAD_ASSIGNED_TOPIC} --project=${PUBSUB_PROJECT_ID}"
+       gcloud pubsub topics create ${PUBSUB_LOAD_ASSIGNED_TOPIC} --project=${PUBSUB_PROJECT_ID} &&
+       gcloud pubsub subscriptions create ${PUBSUB_LOAD_ASSIGNED_SUBSCRIPTION} \
+         --topic=${PUBSUB_LOAD_ASSIGNED_TOPIC} --project=${PUBSUB_PROJECT_ID}"
 volumes:
   pg: {}
   mongo: {}

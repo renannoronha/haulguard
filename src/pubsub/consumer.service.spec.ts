@@ -40,7 +40,7 @@ describe("ConsumerService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.PUBSUB_PROJECT_ID = "test-project";
-    process.env.LOAD_ASSIGNED_SUBSCRIPTION = "load.assigned.sub";
+    process.env.PUBSUB_LOAD_ASSIGNED_SUBSCRIPTION = "load.assigned.sub";
 
     auditService = {
       record: jest.fn().mockResolvedValue(undefined),
@@ -67,7 +67,7 @@ describe("ConsumerService", () => {
 
   afterEach(() => {
     delete process.env.PUBSUB_PROJECT_ID;
-    delete process.env.LOAD_ASSIGNED_SUBSCRIPTION;
+    delete process.env.PUBSUB_LOAD_ASSIGNED_SUBSCRIPTION;
   });
 
   it("connects to the configured subscription and processes messages", async () => {

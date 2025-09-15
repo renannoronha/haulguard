@@ -17,7 +17,7 @@ export class ConsumerService implements OnModuleInit, OnModuleDestroy {
 
   constructor(private readonly auditService: AuditService) {
     this.projectId = process.env.PUBSUB_PROJECT_ID ?? "";
-    this.subscriptionName = process.env.LOAD_ASSIGNED_SUBSCRIPTION ?? "";
+    this.subscriptionName = process.env.PUBSUB_LOAD_ASSIGNED_SUBSCRIPTION ?? "";
     this.pubsub = new PubSub({ projectId: this.projectId });
   }
 

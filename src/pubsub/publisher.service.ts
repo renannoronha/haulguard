@@ -7,7 +7,7 @@ export class PublisherService {
   private readonly projectId: string;
 
   constructor() {
-    this.projectId = process.env.PUBSUB_PROJECT_ID ?? "fake";
+    this.projectId = process.env.PUBSUB_PROJECT_ID ?? "";
     // If PUBSUB_EMULATOR_HOST is set, the SDK uses the emulator automatically
     this.pubsub = new PubSub({ projectId: this.projectId });
   }
