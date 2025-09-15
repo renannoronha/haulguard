@@ -6,6 +6,7 @@ import {
 } from "@nestjs/common";
 import { Message, PubSub, Subscription } from "@google-cloud/pubsub";
 import { AuditService } from "../audit/audit.service";
+import { AppConfigService } from "src/config/app-config.service";
 
 @Injectable()
 export class ConsumerService implements OnModuleInit, OnModuleDestroy {
@@ -15,9 +16,13 @@ export class ConsumerService implements OnModuleInit, OnModuleDestroy {
   private readonly pubsub: PubSub;
   private subscription?: Subscription;
 
-  constructor(private readonly auditService: AuditService) {
-    this.projectId = process.env.PUBSUB_PROJECT_ID ?? "";
-    this.subscriptionName = process.env.PUBSUB_LOAD_ASSIGNED_SUBSCRIPTION ?? "";
+  constructor(
+    private readonly auditService: AuditService,
+    private readonly config: AppConfigService,
+  ) {
+    const pubsubConfig = this.config.pubsub();
+    this.projectId = pubsubConfig.projectId;
+    this.subscriptionName = pubsubConfig.subscription;
     this.pubsub = new PubSub({ projectId: this.projectId });
   }
 

@@ -15,6 +15,8 @@ import { ResponseInterceptor } from "./common/http/response.interceptor";
 import { HttpExceptionFilter } from "./common/http/http-exception.filter";
 import { AuditModule } from "./audit/audit.module";
 import { PublisherModule } from "./pubsub/publisher.module";
+import { AppConfigModule } from "./config/app-config.module";
+import { AppConfigService } from "./config/app-config.service";
 
 @Module({
   imports: [
@@ -22,6 +24,7 @@ import { PublisherModule } from "./pubsub/publisher.module";
       isGlobal: true,
       validate: envValidate,
     }),
+    AppConfigModule,
     AuthModule,
     UsersModule,
     DriversModule,
@@ -29,16 +32,23 @@ import { PublisherModule } from "./pubsub/publisher.module";
     AssignmentsModule,
     AuditModule,
     PublisherModule,
-    TypeOrmModule.forRoot({
-      type: "postgres",
-      host: process.env.POSTGRES_HOST,
-      port: parseInt(process.env.POSTGRES_PORT ?? "5432", 10),
-      username: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DB,
-      autoLoadEntities: true,
-      synchronize: false,
-      migrations: ["dist/migrations/*.js"],
+    TypeOrmModule.forRootAsync({
+      imports: [AppConfigModule],
+      inject: [AppConfigService],
+      useFactory: (config: AppConfigService) => {
+        const db = config.postgres();
+        return {
+          type: "postgres" as const,
+          host: db.host,
+          port: db.port,
+          username: db.username,
+          password: db.password,
+          database: db.database,
+          autoLoadEntities: true,
+          synchronize: false,
+          migrations: ["dist/migrations/*.js"],
+        };
+      },
     }),
   ],
   controllers: [AppController],

@@ -13,6 +13,8 @@ export const envValidate = (config: Record<string, unknown>) => {
     "MONGO_URI",
     "MONGO_DB",
     "PUBSUB_PROJECT_ID",
+    "PUBSUB_LOAD_ASSIGNED_TOPIC",
+    "PUBSUB_LOAD_ASSIGNED_SUBSCRIPTION",
   ];
 
   for (const key of required) {

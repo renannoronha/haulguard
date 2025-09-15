@@ -1,10 +1,17 @@
 import { Injectable } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
+import { AppConfigService } from "src/config/app-config.service";
 
 @Injectable()
 export class PasswordService {
-  private readonly rounds = Number(process.env.BCRYPT_ROUNDS ?? 12);
-  private readonly pepper = process.env.BCRYPT_PEPPER ?? "";
+  private readonly rounds: number;
+  private readonly pepper: string;
+
+  constructor(private readonly config: AppConfigService) {
+    const { rounds, pepper } = this.config.bcrypt();
+    this.rounds = rounds;
+    this.pepper = pepper;
+  }
 
   private withPepper(plain: string) {
     return `${plain}${this.pepper}`;

@@ -90,6 +90,10 @@
       "<rootDir>/../test/setup-os-polyfill.ts"
     ],
     "testRegex": ".*\\.spec\\.ts$",
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1",
+      "^libs/(.*)$": "<rootDir>/../libs/$1"
+    },
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },

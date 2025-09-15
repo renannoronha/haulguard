@@ -1,6 +1,7 @@
 import { Logger } from "@nestjs/common";
 import { ConsumerService } from "./consumer.service";
 import type { AuditService } from "../audit/audit.service";
+import type { AppConfigService } from "src/config/app-config.service";
 
 type SubscriptionMock = {
   on: jest.Mock;
@@ -36,14 +37,20 @@ describe("ConsumerService", () => {
   let service: ConsumerService;
   let auditService: { record: jest.Mock };
   let messageHandler: ((message: { data: Buffer; ack: jest.Mock }) => void) | undefined;
+  let config: { pubsub: jest.Mock };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.PUBSUB_PROJECT_ID = "test-project";
-    process.env.PUBSUB_LOAD_ASSIGNED_SUBSCRIPTION = "load.assigned.sub";
-
     auditService = {
       record: jest.fn().mockResolvedValue(undefined),
+    };
+    config = {
+      pubsub: jest.fn(() => ({
+        projectId: "test-project",
+        subscription: "load.assigned.sub",
+        topic: "load.assigned",
+        emulatorHost: undefined,
+      })),
     };
 
     subscriptionMock.on.mockImplementation((event: string, handler: unknown) => {
@@ -53,7 +60,10 @@ describe("ConsumerService", () => {
       return subscriptionMock;
     });
 
-    service = new ConsumerService(auditService as unknown as AuditService);
+    service = new ConsumerService(
+      auditService as unknown as AuditService,
+      config as unknown as AppConfigService,
+    );
     (service as unknown as { logger: Logger }).logger = {
       log: jest.fn(),
       error: jest.fn(),
@@ -65,14 +75,10 @@ describe("ConsumerService", () => {
     } as unknown as Logger;
   });
 
-  afterEach(() => {
-    delete process.env.PUBSUB_PROJECT_ID;
-    delete process.env.PUBSUB_LOAD_ASSIGNED_SUBSCRIPTION;
-  });
-
   it("connects to the configured subscription and processes messages", async () => {
     await service.onModuleInit();
 
+    expect(config.pubsub).toHaveBeenCalledTimes(1);
     expect(PubSubMock).toHaveBeenCalledWith({ projectId: "test-project" });
     expect(subscriptionFn).toHaveBeenCalledWith("load.assigned.sub");
     expect(typeof messageHandler).toBe("function");

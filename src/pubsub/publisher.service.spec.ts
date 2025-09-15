@@ -1,4 +1,5 @@
 import { PublisherService } from "./publisher.service";
+import type { AppConfigService } from "src/config/app-config.service";
 
 type PubSubMocks = {
   publishMessageMock: jest.Mock;
@@ -24,12 +25,23 @@ const {
 
 describe("PublisherService", () => {
   let service: PublisherService;
+  let config: {
+    pubsub: jest.Mock;
+  };
 
   beforeEach(() => {
     publishMessageMock.mockReset();
     topicMock.mockClear();
     PubSubMock.mockClear();
-    service = new PublisherService();
+    config = {
+      pubsub: jest.fn(() => ({
+        projectId: "fake",
+        topic: "load.assigned",
+        subscription: "load.assigned.sub",
+        emulatorHost: undefined,
+      })),
+    };
+    service = new PublisherService(config as unknown as AppConfigService);
   });
 
   it("should publish messages with serialized payloads", async () => {
@@ -38,6 +50,7 @@ describe("PublisherService", () => {
 
     const messageId = await service.publish("test-topic", payload);
 
+    expect(config.pubsub).toHaveBeenCalledTimes(1);
     expect(PubSubMock).toHaveBeenCalledWith({ projectId: "fake" });
     expect(topicMock).toHaveBeenCalledWith("test-topic");
     expect(publishMessageMock).toHaveBeenCalledTimes(1);
