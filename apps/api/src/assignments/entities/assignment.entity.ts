@@ -6,7 +6,7 @@ import {
   ManyToOne,
   UpdateDateColumn,
   Index,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from "typeorm";
 import { Driver } from "../../drivers/entities/driver.entity";
 import { Load } from "../../loads/entities/load.entity";
@@ -22,10 +22,13 @@ import { AssignmentStatus } from "../enums/assignment-status.enum";
   where: `status = '${AssignmentStatus.ASSIGNED}'`,
 })
 export class Assignment {
-  @PrimaryColumn({ name: "driver_id", type: "int" })
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ name: "driver_id", type: "int" })
   driverId: number;
 
-  @PrimaryColumn({ name: "load_id", type: "int" })
+  @Column({ name: "load_id", type: "int" })
   loadId: number;
 
   @ManyToOne(() => Driver, (driver) => driver.assignments)

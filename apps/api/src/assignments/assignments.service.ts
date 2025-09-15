@@ -54,17 +54,13 @@ export class AssignmentsService {
     return this.assignmentsRepository.find();
   }
 
-  findOne(driverId: number, loadId: number) {
-    return this.assignmentsRepository.findOneBy({ driverId, loadId });
+  findOne(id: number) {
+    return this.assignmentsRepository.findOneBy({ id });
   }
 
-  async update(
-    driverId: number,
-    loadId: number,
-    updateAssignmentDto: UpdateAssignmentDto,
-  ) {
+  async update(id: number, updateAssignmentDto: UpdateAssignmentDto) {
     const result = await this.assignmentsRepository.update(
-      { driverId, loadId },
+      { id },
       updateAssignmentDto,
     );
     return { affected: result.affected || 0 };

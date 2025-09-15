@@ -26,24 +26,16 @@ export class AssignmentsController {
     return this.assignmentsService.findAll();
   }
 
-  @Get(":driverId/:loadId")
-  findOne(
-    @Param("driverId", ParseIntPipe) driverId: number,
-    @Param("loadId", ParseIntPipe) loadId: number,
-  ) {
-    return this.assignmentsService.findOne(driverId, loadId);
+  @Get(":id")
+  findOne(@Param("id", ParseIntPipe) id: number) {
+    return this.assignmentsService.findOne(id);
   }
 
-  @Patch(":driverId/:loadId")
+  @Patch(":id")
   update(
-    @Param("driverId", ParseIntPipe) driverId: number,
-    @Param("loadId", ParseIntPipe) loadId: number,
+    @Param("id", ParseIntPipe) id: number,
     @Body(ValidationPipe) updateAssignmentDto: UpdateAssignmentDto,
   ) {
-    return this.assignmentsService.update(
-      driverId,
-      loadId,
-      updateAssignmentDto,
-    );
+    return this.assignmentsService.update(id, updateAssignmentDto);
   }
 }
