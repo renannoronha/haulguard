@@ -4,31 +4,19 @@ This repository contains the HaulGuard API, background worker, and infrastructur
 
 ## Quick start
 
-1. **Copy environment variables**
+1. **Bootstrap environment files and dependencies, boot the infrastructure stack, run database migrations, start the API**
    ```bash
    cp .env.example .env
-   ```
-2. **Start infrastructure containers** (build images if needed)
-   ```bash
    npm run infra:up
-   ```
-3. **Install Node.js dependencies** (from the repository root)
-   ```bash
    npm install
-   ```
-4. **Run database migrations**
-   ```bash
    npm run db:migrate
-   ```
-5. **Run the API in watch mode** (leave running in its own terminal)
-   ```bash
    npm run start:dev
    ```
-6. **Start the background worker** in a separate terminal so it can consume Pub/Sub messages and write audit events.
+2. **Start the background worker** (run in it's own terminal)
    ```bash
    npm run start:worker
    ```
-7. **Run a quick smoke test** once both processes are booted to verify the API answers and Pub/Sub wiring is healthy.
+3. **Run the smoke test script** once both processes are online to verify the API and Pub/Sub wiring
    ```bash
    ./scripts/test_endpoints.sh
    ```
