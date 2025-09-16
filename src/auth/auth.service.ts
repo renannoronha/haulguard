@@ -23,7 +23,7 @@ export class AuthService {
   async signup(data: SignUpDto): Promise<any> {
     const user = new CreateUserDto();
     user.email = data.email;
-    user.password = await this.password.hash(data.password);
+    user.password = data.password;
     user.name = data.name;
     try {
       await this.usersService.create(user);
@@ -40,7 +40,7 @@ export class AuthService {
   }
 
   async login(username: string, password: string): Promise<any> {
-    const user = await this.usersService.findByEmail(username);
+    const user = await this.usersService.findByEmail(username, true);
 
     if (!user) {
       throw new UnauthorizedException("login_failed_user_not_found");
@@ -65,7 +65,6 @@ export class AuthService {
       sessionId: jti,
     };
     const access_token = await this.jwtService.signAsync(payload);
-
     await this.usersService.update(user.id, {
       lastLogin: new Date(),
       sessionId: jti,
