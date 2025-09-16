@@ -89,9 +89,13 @@ describe("ConsumerModule integration", () => {
       subscription: "load.assigned.sub",
       emulatorHost: "localhost:8085",
     })),
-  } satisfies Pick<AppConfigService, "pubsub">;
+    mongo: jest.fn(() => ({
+      uri: "mongodb://localhost:27017",
+      dbName: "haulguard-test",
+    })),
+  } satisfies Pick<AppConfigService, "pubsub" | "mongo">;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     const mongooseConnectionMock = {
       close: jest.fn(),
       asPromise: jest.fn(),
@@ -113,12 +117,9 @@ describe("ConsumerModule integration", () => {
       .useValue({});
 
     const moduleRef = await moduleBuilder.compile();
-    app = await moduleRef.createNestApplicationContext();
+    app = moduleRef;
     service = app.get(ConsumerService);
-  });
 
-  beforeEach(() => {
-    jest.clearAllMocks();
     topicMockInstance.exists.mockResolvedValue([true]);
     topicMockInstance.create.mockResolvedValue([{}]);
     topicMockInstance.createSubscription.mockResolvedValue([{}]);
@@ -126,8 +127,9 @@ describe("ConsumerModule integration", () => {
     topicSubscriptionMock.exists.mockResolvedValue([true]);
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await app.close();
+    jest.clearAllMocks();
   });
 
   it("wires Pub/Sub subscription and processes messages", async () => {

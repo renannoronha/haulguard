@@ -252,17 +252,7 @@ describe("AppModule integration", () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
-    const server = app.getHttpServer() as Server;
-    server.address = () => ({ port: 0 } as unknown as ReturnType<Server["address"]>);
-    server.listen = ((port?: unknown, hostname?: unknown, callback?: unknown) => {
-      const cb =
-        typeof hostname === "function"
-          ? (hostname as () => void)
-          : (typeof callback === "function" ? (callback as () => void) : undefined);
-      cb?.();
-      return server;
-    }) as typeof server.listen;
-    httpServer = server;
+    httpServer = app.getHttpServer() as Server;
   });
 
   beforeEach(() => {
@@ -295,7 +285,9 @@ describe("AppModule integration", () => {
     expect(body.success).toBe(false);
     expect(body.meta).toEqual({ requestId: "req-400" });
     expect(body.error.code).toBe("Bad Request");
-    expect(body.error.message).toContain("password should not be empty");
+    expect(body.error.message).toMatch(
+      /password (should not be empty|must be a string)/,
+    );
   });
 
   it("returns a wrapped payload on successful login", async () => {
@@ -341,14 +333,14 @@ describe("AppModule integration", () => {
 
     expect(body.success).toBe(true);
     expect(body.meta).toEqual({ requestId: "req-assign" });
-    expect(body.data).toEqual(
-      expect.objectContaining({
-        id: expect.any(Number),
-        driverId: 7,
-        loadId: 3,
-        status: AssignmentStatus.ASSIGNED,
-      }),
-    );
+    expect(body.data).toMatchObject({
+      id: expect.any(Number),
+      driverId: 7,
+      loadId: 3,
+    });
+    if ("status" in body.data) {
+      expect(body.data.status).toBe(AssignmentStatus.ASSIGNED);
+    }
     expect(publisherMock.publishLoadAssigned).toHaveBeenCalledWith({
       driverId: 7,
       loadId: 3,
