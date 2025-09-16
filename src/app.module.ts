@@ -15,6 +15,7 @@ import { AuditModule } from "./audit/audit.module";
 import { PublisherModule } from "./pubsub/publisher.module";
 import { AppConfigModule } from "./config/app-config.module";
 import { AppConfigService } from "./config/app-config.service";
+import { MongooseModule } from "@nestjs/mongoose";
 
 @Module({
   imports: [
@@ -41,6 +42,17 @@ import { AppConfigService } from "./config/app-config.service";
           autoLoadEntities: true,
           synchronize: false,
           migrations: ["dist/migrations/*.js"],
+        };
+      },
+    }),
+    MongooseModule.forRootAsync({
+      imports: [AppConfigModule],
+      inject: [AppConfigService],
+      useFactory: (config: AppConfigService) => {
+        const mongo = config.mongo();
+        return {
+          uri: mongo.uri,
+          dbName: mongo.dbName,
         };
       },
     }),
