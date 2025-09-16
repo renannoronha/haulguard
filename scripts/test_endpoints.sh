@@ -65,7 +65,6 @@ if [ -z "$TOKEN" ]; then
     fi
 
     LOGIN_RESPONSE=$(make_request "POST" "/auth/login" "$LOGIN_PAYLOAD")
-    echo "Retry login response: $LOGIN_RESPONSE"
     TOKEN=$(echo "$LOGIN_RESPONSE" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
 
     if [ -z "$TOKEN" ]; then
@@ -186,6 +185,16 @@ if [[ $STATUS_RESPONSE == *"\"affected\":1"* ]]; then
     echo -e "\n✅ Updated assignment status"
 else
     echo -e "${RED}❌ Failed to update assignment status: $STATUS_RESPONSE${NC}"
+    exit 1
+fi
+
+echo -e "\n${GREEN}11. Get assignment details${NC}"
+ASSIGNMENT_DETAILS=$(make_request "GET" "/assignments/$ASSIGNMENT_ID" "" "$TOKEN")
+echo "$ASSIGNMENT_DETAILS"
+if [[ $ASSIGNMENT_DETAILS == *"\"success\":true"* ]]; then
+    echo -e "\n✅ Got assignment details"
+else
+    echo -e "${RED}❌ Failed to fetch assignment details: $ASSIGNMENT_DETAILS${NC}"
     exit 1
 fi
 
