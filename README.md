@@ -5,7 +5,8 @@ This repository contains a small Driver and Load Management API. It allows users
 ## Quick start
 
 1. **Bootstrap environment files and dependencies, boot the infrastructure stack, run database migrations, start the API**
-  Be sure to have docker daemon running before this step.
+  
+    Be sure to have docker daemon running before this step.
    ```bash
    cp .env.example .env
    npm run infra:up
