@@ -32,7 +32,7 @@ describe("AssignmentsService", () => {
     create: jest.Mock;
     save: jest.Mock;
   };
-  let publisher: { publishLoadAssigned: jest.Mock };
+  let publisher: { publishMessage: jest.Mock };
   let audit: { record: jest.Mock };
 
   beforeEach(async () => {
@@ -40,7 +40,7 @@ describe("AssignmentsService", () => {
       create: jest.fn((dto) => ({ ...dto })),
       save: jest.fn(),
     };
-    publisher = { publishLoadAssigned: jest.fn() };
+    publisher = { publishMessage: jest.fn() };
     audit = { record: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -75,13 +75,9 @@ describe("AssignmentsService", () => {
       );
 
     await expect(service.create(dto)).resolves.toEqual(savedAssignment);
-    expect(publisher.publishLoadAssigned).toHaveBeenCalledWith({
-      driverId: dto.driverId,
-      loadId: dto.loadId,
-    });
-    expect(audit.record).toHaveBeenCalledWith({
-      type: "ASSIGNED",
-      payload: { driverId: dto.driverId, loadId: dto.loadId },
+    expect(publisher.publishMessage).toHaveBeenCalledWith({
+      type: "ASSIGNMENT_CREATED",
+      payload: savedAssignment,
     });
 
     const secondAttempt = service.create(dto);
@@ -89,7 +85,6 @@ describe("AssignmentsService", () => {
     await expect(secondAttempt).rejects.toThrow(
       "driver_already_has_active_assignment",
     );
-    expect(publisher.publishLoadAssigned).toHaveBeenCalledTimes(1);
-    expect(audit.record).toHaveBeenCalledTimes(1);
+    expect(publisher.publishMessage).toHaveBeenCalledTimes(1);
   });
 });

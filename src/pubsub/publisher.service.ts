@@ -29,7 +29,7 @@ export class PublisherService {
     return messageId;
   }
 
-  async publishLoadAssigned(payload: { driverId: number; loadId: number }) {
+  async publishMessage(payload: { type: string; payload: unknown }) {
     return this.publish(this.topic, payload);
   }
 }

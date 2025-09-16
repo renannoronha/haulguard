@@ -81,7 +81,7 @@ const {
 describe("ConsumerModule integration", () => {
   let app: INestApplicationContext;
   let service: ConsumerService;
-  const auditMock = { record: jest.fn() };
+  const auditMock = { record: jest.fn(), findAll: jest.fn() };
   const configStub = {
     pubsub: jest.fn(() => ({
       projectId: "test-project",
@@ -157,17 +157,15 @@ describe("ConsumerModule integration", () => {
 
     const ack = jest.fn();
     const payload = { driverId: 9, loadId: 4 };
+    const event = { type: "ASSIGNED", payload };
     messageHandler?.({
-      data: Buffer.from(JSON.stringify(payload)),
+      data: Buffer.from(JSON.stringify(event)),
       ack,
     });
 
     await new Promise((resolve) => setImmediate(resolve));
 
-    expect(auditMock.record).toHaveBeenCalledWith({
-      type: "ASSIGNED",
-      payload,
-    });
+    expect(auditMock.record).toHaveBeenCalledWith(event);
     expect(ack).toHaveBeenCalledTimes(1);
 
     await service.onModuleDestroy();

@@ -3,6 +3,7 @@ import { AuditService } from "./audit.service";
 import { MongooseModule } from "@nestjs/mongoose";
 import { AuditEventDoc, AuditEventSchema } from "./audit.schema";
 import { AppConfigModule } from "src/config/app-config.module";
+import { AuditController } from "./audit.controller";
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { AppConfigModule } from "src/config/app-config.module";
       { name: AuditEventDoc.name, schema: AuditEventSchema },
     ]),
   ],
+  controllers: [AuditController],
   providers: [AuditService],
   exports: [AuditService],
 })

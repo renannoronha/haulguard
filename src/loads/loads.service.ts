@@ -6,7 +6,7 @@ import { Load } from "./entities/load.entity";
 import { Repository } from "typeorm";
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import type { Cache } from "cache-manager";
-import { AuditService } from "../audit/audit.service";
+import { PublisherService } from "src/pubsub/publisher.service";
 
 @Injectable()
 export class LoadsService {
@@ -14,7 +14,7 @@ export class LoadsService {
     @InjectRepository(Load)
     private loadsRepository: Repository<Load>,
     @Inject(CACHE_MANAGER) private cache: Cache,
-    private readonly audit: AuditService,
+    private readonly publisher: PublisherService,
   ) {}
 
   async create(createLoadDto: CreateLoadDto) {
@@ -22,7 +22,7 @@ export class LoadsService {
     const savedLoad = await this.loadsRepository.save(load);
     // Invalidate cached loads list
     await this.cache.del("loads:all");
-    await this.audit.record({
+    await this.publisher.publishMessage({
       type: "LOAD_CREATED",
       payload: savedLoad,
     });
@@ -47,7 +47,7 @@ export class LoadsService {
     await this.loadsRepository.update(id, updateLoadDto);
     // Invalidate cached loads list
     await this.cache.del("loads:all");
-    await this.audit.record({
+    await this.publisher.publishMessage({
       type: "LOAD_UPDATED",
       payload: { id, changes: updateLoadDto },
     });
@@ -61,7 +61,7 @@ export class LoadsService {
     }
     // Invalidate cached loads list
     await this.cache.del("loads:all");
-    await this.audit.record({
+    await this.publisher.publishMessage({
       type: "LOAD_DELETED",
       payload: { id },
     });

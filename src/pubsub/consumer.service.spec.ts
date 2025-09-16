@@ -140,17 +140,20 @@ describe("ConsumerService", () => {
     expect(typeof messageHandler).toBe("function");
 
     const ack = jest.fn();
-    const payload = { driverId: 7, loadId: 3 };
+    const event = {
+      type: "ASSIGNMENT_CREATED",
+      payload: { driverId: 7, loadId: 3 },
+    };
     messageHandler?.({
-      data: Buffer.from(JSON.stringify(payload)),
+      data: Buffer.from(JSON.stringify(event)),
       ack,
     });
 
     await new Promise((resolve) => setImmediate(resolve));
 
     expect(auditService.record).toHaveBeenCalledWith({
-      type: "ASSIGNED",
-      payload,
+      type: event.type,
+      payload: event.payload,
     });
     expect(ack).toHaveBeenCalledTimes(1);
   });

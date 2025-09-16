@@ -59,18 +59,21 @@ describe("PublisherService", () => {
     expect(messageId).toBe("message-123");
   });
 
-  it("should publish load assigned events and allow consumers to parse them", async () => {
+  it("should publish domain events and allow consumers to parse them", async () => {
     const consumer = jest.fn();
     publishMessageMock.mockImplementationOnce(async ({ data }) => {
       consumer(JSON.parse(data.toString("utf-8")));
       return "message-456";
     });
 
-    const payload = { driverId: 9, loadId: 4 };
-    const messageId = await service.publishLoadAssigned(payload);
+    const event = {
+      type: "ASSIGNMENT_CREATED",
+      payload: { driverId: 9, loadId: 4 },
+    };
+    const messageId = await service.publishMessage(event);
 
     expect(topicMock).toHaveBeenCalledWith("load.assigned");
-    expect(consumer).toHaveBeenCalledWith(payload);
+    expect(consumer).toHaveBeenCalledWith(event);
     expect(messageId).toBe("message-456");
   });
 });

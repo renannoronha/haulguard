@@ -21,4 +21,8 @@ export class AuditService {
     const timestamp = event.timestamp ?? new Date();
     await this.model.create({ type, payload, timestamp });
   }
+
+  async findAll(): Promise<AuditEventDoc[]> {
+    return this.model.find().sort({ timestamp: -1 }).lean().exec();
+  }
 }

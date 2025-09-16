@@ -1,6 +1,6 @@
 import { Load } from "./entities/load.entity";
 import { LoadsService } from "./loads.service";
-import { AuditService } from "../audit/audit.service";
+import { PublisherService } from "../pubsub/publisher.service";
 import type { Cache } from "cache-manager";
 import type { Repository } from "typeorm";
 
@@ -19,7 +19,9 @@ describe("LoadsService", () => {
     set: jest.Mock;
     del: jest.Mock;
   };
-  let audit: { record: jest.Mock };
+  let publisher: {
+    publishMessage: jest.Mock;
+  };
 
   beforeEach(() => {
     repository = {
@@ -35,12 +37,14 @@ describe("LoadsService", () => {
       set: jest.fn(),
       del: jest.fn(),
     };
-    audit = { record: jest.fn() };
+    publisher = {
+      publishMessage: jest.fn(),
+    };
 
     service = new LoadsService(
       repository as unknown as Repository<Load>,
       cache as unknown as Cache,
-      audit as unknown as AuditService,
+      publisher as unknown as PublisherService,
     );
   });
 
@@ -83,6 +87,10 @@ describe("LoadsService", () => {
 
     expect(repository.update).toHaveBeenCalledWith(5, updateDto);
     expect(cache.del).toHaveBeenCalledWith("loads:all");
+    expect(publisher.publishMessage).toHaveBeenCalledWith({
+      type: "LOAD_UPDATED",
+      payload: { id: 5, changes: updateDto },
+    });
     expect(result).toEqual({ message: "updated_load_successfully" });
   });
 });

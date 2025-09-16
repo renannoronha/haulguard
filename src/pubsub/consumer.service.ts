@@ -77,11 +77,11 @@ export class ConsumerService implements OnModuleInit, OnModuleDestroy {
     try {
       const payload = this.parsePayload(message);
       await this.auditService.record({
-        type: "ASSIGNED",
-        payload,
+        type: payload.type,
+        payload: payload.payload,
       });
       this.logger.debug(
-        `Processed load.assigned message for driver ${payload.driverId} and load ${payload.loadId}`,
+        `Processed load.assigned message for type=${payload.type} and payload=${JSON.stringify(payload.payload)}`,
       );
     } catch (error) {
       const err = error as Error;
@@ -94,18 +94,18 @@ export class ConsumerService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  private parsePayload(message: Message): { driverId: number; loadId: number } {
+  private parsePayload(message: Message): { type: string; payload: unknown } {
     const content = message.data.toString();
-    const payload = JSON.parse(content) as Partial<{
-      driverId: unknown;
-      loadId: unknown;
+    const messagePayload = JSON.parse(content) as Partial<{
+      type: string;
+      payload: unknown;
     }>;
-    const { driverId, loadId } = payload;
+    const { type, payload } = messagePayload;
 
-    if (typeof driverId !== "number" || typeof loadId !== "number") {
-      throw new Error("Invalid load.assigned message payload");
+    if (!type) {
+      throw new Error("Message payload missing required 'type' property");
     }
 
-    return { driverId, loadId };
+    return { type, payload };
   }
 }

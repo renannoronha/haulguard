@@ -1,5 +1,6 @@
 import { INestApplication } from "@nestjs/common";
 import { Server } from "node:http";
+import type { Express } from "express";
 import { Test } from "@nestjs/testing";
 import request from "supertest";
 
@@ -15,6 +16,7 @@ import { AppModule } from "../src/app.module";
 import { AppConfigService } from "../src/config/app-config.service";
 import { PublisherService } from "../src/pubsub/publisher.service";
 import { AuditService } from "../src/audit/audit.service";
+import { AuditController } from "../src/audit/audit.controller";
 import {
   DataSource,
   type Repository,
@@ -161,10 +163,11 @@ class TestAppConfigService {
 describe("AppModule integration", () => {
   let app: INestApplication;
   let httpServer: Server;
+  let httpApp: Express;
   let userRepository: InMemoryRepository<User>;
   let assignmentRepository: InMemoryRepository<Assignment>;
   let publisherMock: { publish: jest.Mock; publishLoadAssigned: jest.Mock };
-  let auditMock: { record: jest.Mock };
+  let auditMock: { record: jest.Mock; findAll: jest.Mock };
   const configStub = new TestAppConfigService();
   const plainPassword = "Secret#123";
   let hashedPassword: string;
@@ -217,9 +220,11 @@ describe("AppModule integration", () => {
     publisherMock = {
       publish: jest.fn(),
       publishLoadAssigned: jest.fn(),
+      publishMessage: jest.fn(),
     };
     auditMock = {
       record: jest.fn(),
+      findAll: jest.fn().mockResolvedValue([]),
     };
 
     moduleBuilder.overrideProvider(AppConfigService).useValue(configStub);
@@ -253,10 +258,12 @@ describe("AppModule integration", () => {
     app = moduleFixture.createNestApplication();
     await app.init();
     httpServer = app.getHttpServer() as Server;
+    httpApp = app.getHttpAdapter().getInstance<Express>();
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    auditMock.findAll.mockResolvedValue([]);
     seedUser();
     assignmentRepository.reset([]);
   });
@@ -266,7 +273,7 @@ describe("AppModule integration", () => {
   });
 
   const loginAndGetToken = async () => {
-    const response = await request(httpServer)
+    const response = await request(httpApp)
       .post("/auth/login")
       .set("x-request-id", "login-request")
       .send({ username: "admin@example.com", password: plainPassword })
@@ -276,7 +283,7 @@ describe("AppModule integration", () => {
   };
 
   it("wraps validation errors with the global HttpExceptionFilter", async () => {
-    const { body } = await request(httpServer)
+    const { body } = await request(httpApp)
       .post("/auth/login")
       .set("x-request-id", "req-400")
       .send({ username: "admin@example.com" })
@@ -291,7 +298,7 @@ describe("AppModule integration", () => {
   });
 
   it("returns a wrapped payload on successful login", async () => {
-    const { body } = await request(httpServer)
+    const { body } = await request(httpApp)
       .post("/auth/login")
       .set("x-request-id", "req-login")
       .send({ username: "admin@example.com", password: plainPassword })
@@ -305,11 +312,11 @@ describe("AppModule integration", () => {
   });
 
   it("protects private routes with the JWT guard", async () => {
-    await request(httpServer).get("/auth/profile").expect(401);
+    await request(httpApp).get("/auth/profile").expect(401);
 
     const token = await loginAndGetToken();
 
-    const { body } = await request(httpServer)
+    const { body } = await request(httpApp)
       .get("/auth/profile")
       .set("Authorization", `Bearer ${token}`)
       .set("x-request-id", "req-profile")
@@ -324,7 +331,7 @@ describe("AppModule integration", () => {
   it("creates assignments and triggers side effects", async () => {
     const token = await loginAndGetToken();
 
-    const { body } = await request(httpServer)
+    const { body } = await request(httpApp)
       .post("/assignments")
       .set("Authorization", `Bearer ${token}`)
       .set("x-request-id", "req-assign")
@@ -341,13 +348,30 @@ describe("AppModule integration", () => {
     if ("status" in body.data) {
       expect(body.data.status).toBe(AssignmentStatus.ASSIGNED);
     }
-    expect(publisherMock.publishLoadAssigned).toHaveBeenCalledWith({
-      driverId: 7,
-      loadId: 3,
+    expect(publisherMock.publishMessage).toHaveBeenCalledWith({
+      type: "ASSIGNMENT_CREATED",
+      payload: expect.objectContaining({
+        driverId: 7,
+        loadId: 3,
+      }),
     });
-    expect(auditMock.record).toHaveBeenCalledWith({
-      type: "ASSIGNED",
-      payload: { driverId: 7, loadId: 3 },
-    });
+  });
+
+  it("lists audit events", async () => {
+    const token = await loginAndGetToken();
+    const events = [
+      {
+        type: "ASSIGNED",
+        payload: { driverId: 7, loadId: 3 },
+        timestamp: new Date().toISOString(),
+      },
+    ];
+    auditMock.findAll.mockResolvedValueOnce(events);
+
+    const controller = app.get(AuditController);
+    const result = await controller.findAll();
+
+    expect(result).toEqual(events);
+    expect(auditMock.findAll).toHaveBeenCalledTimes(1);
   });
 });

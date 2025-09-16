@@ -8,11 +8,13 @@ import { redisStore } from "cache-manager-redis-yet";
 import { AuditModule } from "../audit/audit.module";
 import { AppConfigModule } from "src/config/app-config.module";
 import { AppConfigService } from "src/config/app-config.service";
+import { PublisherModule } from "src/pubsub/publisher.module";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Load]),
     AuditModule,
+    PublisherModule,
     CacheModule.registerAsync({
       imports: [AppConfigModule],
       inject: [AppConfigService],
