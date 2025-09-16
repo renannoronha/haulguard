@@ -1,6 +1,6 @@
 # HaulGuard
 
-This repository contains the HaulGuard API, background worker, and infrastructure needed to manage drivers, loads, and assignment events.
+This repository contains a small Driver and Load Management API. It allows users to manage drivers, loads and assign loads to drivers under the rule that a driver can only have one active load at a time.
 
 ## Quick start
 
