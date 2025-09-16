@@ -32,8 +32,18 @@ export class UsersService {
     return this.usersRepository.findOneBy({ id });
   }
 
-  findByEmail(email: string) {
-    return this.usersRepository.findOne({ where: { email } });
+  findByEmail(email: string, selectPassword: boolean = false) {
+    return this.usersRepository.findOne({
+      where: { email },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: selectPassword,
+        status: true,
+        role: true,
+      },
+    });
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
